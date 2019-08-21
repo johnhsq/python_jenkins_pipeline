@@ -1,0 +1,59 @@
+#!/usr/bin/groovy
+
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    stages {
+
+        stage("Build") {
+            steps { buildApp() }
+		}
+
+        stage("Deploy - Dev") {
+            steps { deploy('dev') }
+		}
+
+	}
+}
+
+
+// steps
+def buildApp() {
+	def imageName = 'johnhsq/python_jenkins_demo'
+	// go to the cd_pipeline directory
+	dir ('cd_pipeline' ) { 
+		
+		// the Jenkins docker image includes docker installation
+		// build the app docker image with tag "johnhsq/python_jenkins_demo appending build number
+		def appImage = docker.build("${imageName}:${BUILD_NUMBER}")
+	}
+}
+
+def deploy(environment) {
+
+	def containerName = ''
+	def port = ''
+	def imageName = 'johnhsq/python_jenkins_demo'
+
+	if ("${environment}" == 'dev') {
+		containerName = "app_dev"
+		port = "8888"
+	} 
+	else {
+		println "Environment not valid"
+		System.exit(0)
+	}
+	
+	//stop the container if it's already running
+	sh "docker ps -f name=${containerName} -q | xargs --no-run-if-empty docker stop"
+	//delete the container
+	sh "docker ps -a -f name=${containerName} -q | xargs -r docker rm"
+	//deploy the new built container
+	sh "docker run -d -p ${port}:5000 --name ${containerName} ${imageName}:${BUILD_NUMBER}"
+
+}
+
