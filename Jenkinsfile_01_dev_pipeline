@@ -24,8 +24,8 @@ pipeline {
 // steps
 def buildApp() {
 	def imageName = 'johnhsq/python_jenkins_pipeline'
-	// go to the cd_pipeline directory
-	dir ('cd_pipeline' ) { 
+	// go to the directory
+	dir ('' ) { 
 		
 		// the Jenkins docker image includes docker installation
 		// build the app docker image with tag "johnhsq/python_jenkins_demo appending build number
