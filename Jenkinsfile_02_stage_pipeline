@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-		# set PYTHONPATH where python will look for modules and packages
+		// set PYTHONPATH where python will look for modules and packages
 		PYTHONPATH = "${WORKSPACE}/python_app"
     }
     stages {
