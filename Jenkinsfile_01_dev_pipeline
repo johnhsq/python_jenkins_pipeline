@@ -25,7 +25,7 @@ pipeline {
 def buildApp() {
 	def imageName = 'johnhsq/python_sample_app'
 	// go to the directory
-	dir ('' ) { 
+	dir ('python_app' ) { 
 		
 		// the Jenkins docker image includes docker installation
 		// build the app docker image with tag "johnhsq/python_sample_app" appending build number
