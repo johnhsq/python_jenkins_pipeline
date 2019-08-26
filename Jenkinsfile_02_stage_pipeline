@@ -1,0 +1,91 @@
+#!/usr/bin/groovy
+
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    environment {
+	# set PYTHONPATH where python will look for modules and packages
+	PYTHONPATH = "${WORKSPACE}/python_app"
+    }
+    stages {
+
+	stage("Test - Unit tests") {
+		steps { runUnittests() }
+	}
+
+        stage("Build") {
+            steps { buildApp() }
+		}
+
+        stage("Deploy - Dev") {
+            steps { deploy('dev') }
+		}
+
+	stage("Test - UAT Dev") {
+	    steps { runUAT(8888) }
+		}
+
+	stage("Deploy - Stage") {
+	    steps { deploy('stage') }
+		}
+	
+	stage("Test - UAT Stage") {
+	    steps { runUAT(88) }
+		}
+
+	}
+}
+
+
+// steps
+def buildApp() {
+	def imageName = 'johnhsq/python_sample_app'
+	// go to the directory
+	dir ('python_app' ) { 
+		
+		// the Jenkins docker image includes docker installation
+		// build the app docker image with tag "johnhsq/python_sample_app" appending build number
+		def appImage = docker.build("${imageName}:${BUILD_NUMBER}")
+	}
+}
+
+def deploy(environment) {
+
+	def containerName = ''
+	def port = ''
+	def imageName = 'johnhsq/python_sample_app'
+
+	if ("${environment}" == 'dev') {
+		containerName = "app_dev"
+		port = "8888"
+	} else if ("${environment}" == 'stage') {
+		containerName = "app_stage"
+		port = "88"
+	}
+	else {
+		println "Environment not valid"
+		System.exit(0)
+	}
+	
+	//stop the container if it's already running
+	sh "docker ps -f name=${containerName} -q | xargs --no-run-if-empty docker stop"
+	//delete the container
+	sh "docker ps -a -f name=${containerName} -q | xargs -r docker rm"
+	//deploy the new built container
+	sh "docker run -d -p ${port}:5000 --name ${containerName} ${imageName}:${BUILD_NUMBER}"
+
+}
+
+def runUnittests() {
+	sh "pip3 install --no-cache-dir -r ./python_app/requirements.txt"
+	sh "python3 python_app/tests/test_flask_app.py"
+}
+
+
+def runUAT(port) {
+	sh "python_app/tests/runUAT.sh ${port}"
+}
