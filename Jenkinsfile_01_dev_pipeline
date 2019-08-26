@@ -23,12 +23,12 @@ pipeline {
 
 // steps
 def buildApp() {
-	def imageName = 'johnhsq/python_jenkins_pipeline'
+	def imageName = 'johnhsq/python_sample_app'
 	// go to the directory
 	dir ('' ) { 
 		
 		// the Jenkins docker image includes docker installation
-		// build the app docker image with tag "johnhsq/python_jenkins_demo appending build number
+		// build the app docker image with tag "johnhsq/python_sample_app" appending build number
 		def appImage = docker.build("${imageName}:${BUILD_NUMBER}")
 	}
 }
@@ -37,7 +37,7 @@ def deploy(environment) {
 
 	def containerName = ''
 	def port = ''
-	def imageName = 'johnhsq/python_jenkins_pipeline'
+	def imageName = 'johnhsq/python_sample_app'
 
 	if ("${environment}" == 'dev') {
 		containerName = "app_dev"
