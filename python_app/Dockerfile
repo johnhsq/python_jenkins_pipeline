@@ -1,6 +1,9 @@
 # base image
 FROM alpine:3.7
 
+# Install bash 
+RUN apk add --no-cache bash
+
 # Install python 3 and pip
 RUN apk add --update python3
 
