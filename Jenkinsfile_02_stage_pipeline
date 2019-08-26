@@ -82,11 +82,13 @@ def deploy(environment) {
 }
 
 def runUnittests() {
+	def appSourcePath = 'python_app'
 	sh "pip3 install --no-cache-dir -r ./${appSourcePath}/requirements.txt"
 	sh "python3 ${appSourcePath}/tests/test_flask_app.py"
 }
 
 
 def runUAT(port) {
+	def appSourcePath = 'python_app'
 	sh "${appSourcePath}/tests/runUAT.sh ${port}"
 }
