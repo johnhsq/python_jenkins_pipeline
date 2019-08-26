@@ -3,6 +3,7 @@
 import sys
 import os
 import unittest
+# in Jenkinsfile_02_stage_pipeline, PYTHONPATH is set to find app.py
 import app
 
 class BasicTests(unittest.TestCase):

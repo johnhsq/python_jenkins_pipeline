@@ -8,14 +8,14 @@ pipeline {
     }
 
     environment {
-	# set PYTHONPATH where python will look for modules and packages
-	PYTHONPATH = "${WORKSPACE}/python_app"
+		# set PYTHONPATH where python will look for modules and packages
+		PYTHONPATH = "${WORKSPACE}/python_app"
     }
     stages {
 
-	stage("Test - Unit tests") {
-		steps { runUnittests() }
-	}
+		stage("Test - Unit tests") {
+			steps { runUnittests() }
+		}
 
         stage("Build") {
             steps { buildApp() }
@@ -25,16 +25,16 @@ pipeline {
             steps { deploy('dev') }
 		}
 
-	stage("Test - UAT Dev") {
-	    steps { runUAT(8888) }
+		stage("Test - UAT Dev") {
+			steps { runUAT(8888) }
 		}
 
-	stage("Deploy - Stage") {
-	    steps { deploy('stage') }
+		stage("Deploy - Stage") {
+			steps { deploy('stage') }
 		}
 	
-	stage("Test - UAT Stage") {
-	    steps { runUAT(88) }
+		stage("Test - UAT Stage") {
+			steps { runUAT(88) }
 		}
 
 	}
@@ -44,8 +44,9 @@ pipeline {
 // steps
 def buildApp() {
 	def imageName = 'johnhsq/python_sample_app'
+	def appSourcePath = 'python_app'
 	// go to the directory
-	dir ('python_app' ) { 
+	dir (${appSourcePath}) { 
 		
 		// the Jenkins docker image includes docker installation
 		// build the app docker image with tag "johnhsq/python_sample_app" appending build number
@@ -58,6 +59,7 @@ def deploy(environment) {
 	def containerName = ''
 	def port = ''
 	def imageName = 'johnhsq/python_sample_app'
+	def appSourcePath = 'python_app'
 
 	if ("${environment}" == 'dev') {
 		containerName = "app_dev"
@@ -65,8 +67,7 @@ def deploy(environment) {
 	} else if ("${environment}" == 'stage') {
 		containerName = "app_stage"
 		port = "88"
-	}
-	else {
+	} else {
 		println "Environment not valid"
 		System.exit(0)
 	}
@@ -81,11 +82,11 @@ def deploy(environment) {
 }
 
 def runUnittests() {
-	sh "pip3 install --no-cache-dir -r ./python_app/requirements.txt"
-	sh "python3 python_app/tests/test_flask_app.py"
+	sh "pip3 install --no-cache-dir -r ./${appSourcePath}/requirements.txt"
+	sh "python3 ${appSourcePath}/tests/test_flask_app.py"
 }
 
 
 def runUAT(port) {
-	sh "python_app/tests/runUAT.sh ${port}"
+	sh "${appSourcePath}/tests/runUAT.sh ${port}"
 }
