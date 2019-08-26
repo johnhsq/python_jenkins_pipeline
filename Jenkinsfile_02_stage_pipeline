@@ -46,7 +46,7 @@ def buildApp() {
 	def imageName = 'johnhsq/python_sample_app'
 	def appSourcePath = 'python_app'
 	// go to the directory
-	dir (${appSourcePath}) { 
+	dir (appSourcePath) { 
 		
 		// the Jenkins docker image includes docker installation
 		// build the app docker image with tag "johnhsq/python_sample_app" appending build number
@@ -59,7 +59,6 @@ def deploy(environment) {
 	def containerName = ''
 	def port = ''
 	def imageName = 'johnhsq/python_sample_app'
-	def appSourcePath = 'python_app'
 
 	if ("${environment}" == 'dev') {
 		containerName = "app_dev"
