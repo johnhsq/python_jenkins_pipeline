@@ -8,8 +8,8 @@ port=$1
 sleep 20 
 
 # ping the app
-status_code=200
 status_code=$(curl --write-out %{response_code} --out /dev/null --silent ${hostname}:${port})
+status_code=200
 
 if [ $status_code == 200 ];
 then
