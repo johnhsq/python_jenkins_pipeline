@@ -1,0 +1,115 @@
+#!/usr/bin/groovy
+
+pipeline {
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    environment {
+		// set PYTHONPATH where python will look for modules and packages
+		PYTHONPATH = "${WORKSPACE}/python_app"
+    }
+
+    stages {
+
+		stage("Test - Unit tests") {
+			steps { runUnittests() }
+		}
+
+        stage("Build") {
+            steps { buildApp() }
+		}
+
+        stage("Deploy - Dev") {
+            steps { deploy('dev') }
+		}
+
+		stage("Test - UAT Dev") {
+			steps { runUAT(8888) }
+		}
+
+		stage("Deploy - Stage") {
+			steps { deploy('stage') }
+		}
+	
+		stage("Test - UAT Stage") {
+			steps { runUAT(88) }
+		}
+
+		stage("Approve") {
+			steps { approve() }
+		}
+
+		stage("Deploy - Prod") {
+			steps { deploy('prod') }
+		}
+
+		stage("Test - UAT Prod") {
+			steps { runUAT(80) }
+		}
+
+
+	}
+}
+
+
+// steps
+def buildApp() {
+	def imageName = 'johnhsq/python_sample_app'
+	def appSourcePath = 'python_app'
+	// go to the directory
+	dir (appSourcePath) { 
+		
+		// the Jenkins docker image includes docker installation
+		// build the app docker image with tag "johnhsq/python_sample_app" appending build number
+		def appImage = docker.build("${imageName}:${BUILD_NUMBER}")
+	}
+}
+
+def deploy(environment) {
+
+	def containerName = ''
+	def port = ''
+	def imageName = 'johnhsq/python_sample_app'
+
+	if ("${environment}" == 'dev') {
+		containerName = "app_dev"
+		port = "8888"
+	} else if ("${environment}" == 'stage') {
+		containerName = "app_stage"
+		port = "88"
+	} else if ("${environment}" == 'prod') {
+		containerName = "app_prod"
+		port = "80"
+	} else {
+		println "Environment not valid"
+		System.exit(0)
+	}
+	
+	//stop the container if it's already running
+	sh "docker ps -f name=${containerName} -q | xargs --no-run-if-empty docker stop"
+	//delete the container
+	sh "docker ps -a -f name=${containerName} -q | xargs -r docker rm"
+	//deploy the new built container
+	sh "docker run -d -p ${port}:5000 -v /var/run/docker.sock:/var/run/docker.sock --name ${containerName} ${imageName}:${BUILD_NUMBER}"
+
+}
+
+def runUnittests() {
+	def appSourcePath = 'python_app'
+	sh "pip3 install --no-cache-dir -r ./${appSourcePath}/requirements.txt"
+	sh "python3 ${appSourcePath}/tests/test_flask_app.py"
+}
+
+def runUAT(port) {
+	def appSourcePath = 'python_app'
+	sh "${appSourcePath}/tests/runUAT.sh ${port}"
+}
+
+def approve() {
+    timeout(time:1, unit:'DAYS') {
+		input('Do you want to deploy to prod/live?')
+	}
+}
