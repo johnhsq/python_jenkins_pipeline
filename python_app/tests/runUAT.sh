@@ -2,8 +2,7 @@
 
 # set variables
 hostname='localhost'
-#port=$1
-port=5000
+port=$1
 
 # wait for the app to start
 sleep 20 
