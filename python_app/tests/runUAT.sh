@@ -1,8 +1,10 @@
 #!/bin/bash
 
 # set variables
-hostname='localhost'
-port=$1
+#hostname='localhost'
+#port=$1
+hostname='http://www.google.com'
+port=80
 
 # wait for the app to start
 sleep 20 
