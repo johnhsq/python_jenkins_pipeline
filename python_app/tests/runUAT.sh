@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # set variables
-hostname='localhost'
+#hostname='localhost'
+# when Jenkins is in a container while the testing App is in another container, 
+# the "curl" in Jenkins container can't access the test app
+# here's the workaround: https://docs.docker.com/docker-for-mac/networking/#use-cases-and-workarounds
+hostname='host.docker.internal'
 port=$1
 
 # wait for the app to start
