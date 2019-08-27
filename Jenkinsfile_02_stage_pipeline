@@ -76,7 +76,7 @@ def deploy(environment) {
 	//delete the container
 	sh "docker ps -a -f name=${containerName} -q | xargs -r docker rm"
 	//deploy the new built container
-	sh "docker run -d -p ${port}:5000 -v /var/run/docker.sock:/var/run/docker.sock --name ${containerName} ${imageName}:${BUILD_NUMBER}"
+	sh "docker run -d --net=jenkins_network -p ${port}:5000 -v /var/run/docker.sock:/var/run/docker.sock --name ${containerName} ${imageName}:${BUILD_NUMBER}"
 
 }
 
